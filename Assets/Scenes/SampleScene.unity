@@ -519,6 +519,7 @@ MonoBehaviour:
   effectPrefab: {fileID: 5012912589373166601, guid: 84f7c244bac2c5e47bffae377ee42f41, type: 3}
   effectGroup: {fileID: 788977114}
   maxLevel: 2
+  score: 0
 --- !u!4 &905076341
 Transform:
   m_ObjectHideFlags: 0
@@ -760,7 +761,7 @@ GameObject:
   - component: {fileID: 1288555871}
   m_Layer: 0
   m_Name: Line
-  m_TagString: Untagged
+  m_TagString: Finish
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

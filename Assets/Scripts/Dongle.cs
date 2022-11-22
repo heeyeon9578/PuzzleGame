@@ -7,17 +7,20 @@ public class Dongle : MonoBehaviour
     public int level;
     public bool isDrag = false;
     public bool isMerge =false;
-    Rigidbody2D rigid;
+    public Rigidbody2D rigid;
     Animator anim;
     CircleCollider2D circleCollider;    
     public GameManager gameManager;
     public ParticleSystem effect;
-    
+    SpriteRenderer spriteRenderer;
+    float deadTime;
+
     private void Awake()
     {
         circleCollider = GetComponent<CircleCollider2D>();  
         anim = GetComponent<Animator>();   
-        rigid = GetComponent<Rigidbody2D>();    
+        rigid = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();    
     }
 
     //활성화 할 때마다 호출
@@ -99,7 +102,10 @@ public class Dongle : MonoBehaviour
         isMerge = true;
         rigid.simulated = false;
         circleCollider.enabled = false;
-
+        if(targetPos == Vector3.up * 100)
+        {
+            EffectPlay();
+        }
         StartCoroutine(HideRoutine(targetPos));
     }
 
@@ -109,11 +115,21 @@ public class Dongle : MonoBehaviour
         while(frameCount < 20) //마치 업데이트처럼 작동
         {
             frameCount++;
-            transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+            if(targetPos != Vector3.up * 100)
+            {
+                transform.position = Vector3.Lerp(transform.position, targetPos, 0.5f);
+
+            }else if(targetPos == Vector3.up * 100)
+            {
+                transform.localScale = Vector3.Lerp(transform.localScale, Vector3.zero, 0.2f);
+
+            }
+            
             yield return null;
 
         }
         isMerge = false;
+        gameManager.score+= (int)Mathf.Pow(2, level); //pow 는 float
         gameObject.SetActive(false);
     }
     //나는 레벨업
@@ -139,6 +155,34 @@ public class Dongle : MonoBehaviour
 
     }
 
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.tag == "Finish")
+        {
+            deadTime += Time.deltaTime;
+            if (deadTime > 2)
+            {
+                //spriteRenderer.color = Color.red; 
+                spriteRenderer.color = new Color(0.9f, 0.2f, 0.2f);
+            }
+
+            if (deadTime > 5)
+            {
+                
+                gameManager.GameOver();
+            }
+        }
+    }
+    //경계선 탈출시 로직 작성
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "Finish")
+        {
+            deadTime = 0;
+            spriteRenderer.color = Color.white;
+
+        }
+    }
     void EffectPlay()
     {
         effect.transform.position = transform.position;
