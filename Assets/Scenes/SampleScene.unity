@@ -772,6 +772,10 @@ MonoBehaviour:
   dongleGroup: {fileID: 1747522879}
   effectPrefab: {fileID: 5012912589373166601, guid: 84f7c244bac2c5e47bffae377ee42f41, type: 3}
   effectGroup: {fileID: 788977114}
+  donglePool: []
+  effectPool: []
+  poolSize: 5
+  poolCursor: 0
   maxLevel: 2
   score: 0
   isOver: 0

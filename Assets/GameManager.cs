@@ -7,11 +7,25 @@ public class GameManager : MonoBehaviour
     public Dongle lastDongle;
     public GameObject donglePrefab;
     public Transform dongleGroup;
+
     public GameObject effectPrefab;
     public Transform effectGroup;
+
+    //오브젝트 풀링
+    public List<Dongle> donglePool;
+    public List<ParticleSystem> effectPool;
+    [Range(0,30)]
+    public int poolSize;
+    public int poolCursor;
+
+
+    //스코어, 게임오버
     public int maxLevel;
     public int score;
     public bool isOver;
+    
+
+    //사운드
     public AudioSource bgmPlayer;
     public AudioSource[] sfxPlayer;
     public AudioClip[] sfxClip;
@@ -19,16 +33,44 @@ public class GameManager : MonoBehaviour
     int sfxCursor;
     private void Awake()
     {
+        //인스펙터의 interpolate: 이전 프레임을 비교하여 움직임을 부드럽게 보정
         //프레임이 일정하게 하기
         Application.targetFrameRate = 60;
 
-        //인스펙터의 interpolate: 이전 프레임을 비교하여 움직임을 부드럽게 보정
+        donglePool = new List<Dongle>();   
+        effectPool = new List<ParticleSystem>();
+        for(int i = 0; i < poolSize; i++)
+        {
+            MakeDongle();
+        }
+
+
     }
     void Start()
     {
         bgmPlayer.Play();
         NextDongle();
     }
+
+    Dongle MakeDongle()
+    {
+        //이펙트 생성
+        GameObject instantEffectObj = Instantiate(effectPrefab, effectGroup);
+        instantEffectObj.name = "Effect "+effectPool.Count;
+        ParticleSystem instantEffect = instantEffectObj.GetComponent<ParticleSystem>();
+        effectPool.Add(instantEffect);
+
+        //동글 생성
+        GameObject instantDongleObj = Instantiate(donglePrefab, dongleGroup);
+        instantDongleObj.name = "Dongle " + donglePool.Count;
+        Dongle instantDongle = instantDongleObj.GetComponent<Dongle>();
+        instantDongle.gameManager = this;
+        instantDongle.effect = instantEffect;
+        donglePool.Add(instantDongle); 
+        return instantDongle;
+    }
+
+
     //다음 동글을 가져올 함수
     void NextDongle()
     {
@@ -36,9 +78,9 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
-        Dongle newDongle = GetDongle();
-        lastDongle = newDongle;
-        lastDongle.gameManager = this;
+        
+        lastDongle = GetDongle();
+       
         //동글이의 레벨 값을 0~ maxLevel중에 랜덤으로 설정
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
@@ -59,14 +101,15 @@ public class GameManager : MonoBehaviour
    
     Dongle GetDongle()
     {
-        //이펙트 생성
-        GameObject instantEffectObj = Instantiate(effectPrefab, effectGroup);
-        ParticleSystem instantEffect = instantEffectObj.GetComponent<ParticleSystem>();
-        //동글 생성
-        GameObject instantDongleObj = Instantiate(donglePrefab, dongleGroup);
-        Dongle instantDongle = instantDongleObj.GetComponent<Dongle>();
-        instantDongle.effect = instantEffect;
-        return instantDongle;
+        for(int i=0; i<donglePool.Count; i++)
+        {
+            poolCursor = (poolCursor + 1)% donglePool.Count;
+            if (!donglePool[poolCursor].gameObject.activeSelf)
+            {
+                return donglePool[poolCursor]; 
+            }
+        }
+        return MakeDongle();
 
     }
     public void TouchDown()
