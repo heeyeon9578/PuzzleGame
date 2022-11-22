@@ -11,6 +11,7 @@ public class Dongle : MonoBehaviour
     Animator anim;
     CircleCollider2D circleCollider;    
     public GameManager gameManager;
+    public ParticleSystem effect;
     
     private void Awake()
     {
@@ -130,10 +131,18 @@ public class Dongle : MonoBehaviour
     {
         yield return new WaitForSeconds(0.2f);
         anim.SetInteger("Level", level + 1);
+        EffectPlay();
         yield return new WaitForSeconds(0.3f);
         level++;    
         gameManager.maxLevel =Mathf.Max(gameManager.maxLevel,level);    
         isMerge = false;    
 
+    }
+
+    void EffectPlay()
+    {
+        effect.transform.position = transform.position;
+        effect.transform.localScale = transform.localScale;
+        effect.Play();
     }
 }
