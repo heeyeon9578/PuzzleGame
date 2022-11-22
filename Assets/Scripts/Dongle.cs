@@ -7,6 +7,7 @@ public class Dongle : MonoBehaviour
     public int level;
     public bool isDrag = false;
     public bool isMerge =false;
+    public bool isAttach = false;
     public Rigidbody2D rigid;
     Animator anim;
     CircleCollider2D circleCollider;    
@@ -68,7 +69,21 @@ public class Dongle : MonoBehaviour
         //물리작용을 받게 하기
         rigid.simulated = true;
     }
-
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        gameManager.SfxPlay(GameManager.Sfx.Attach);
+        StartCoroutine(AttachRoutine());
+    }
+    IEnumerator AttachRoutine()
+    {
+        if (isAttach)
+        {
+            yield break;
+        }
+        isAttach = true;
+        yield return new WaitForSeconds(0.2f);
+        isAttach = false;
+    }
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Dongle")
@@ -148,6 +163,7 @@ public class Dongle : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         anim.SetInteger("Level", level + 1);
         EffectPlay();
+        gameManager.SfxPlay(GameManager.Sfx.LevelUp);
         yield return new WaitForSeconds(0.3f);
         level++;    
         gameManager.maxLevel =Mathf.Max(gameManager.maxLevel,level);    

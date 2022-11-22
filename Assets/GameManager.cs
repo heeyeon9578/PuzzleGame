@@ -12,7 +12,11 @@ public class GameManager : MonoBehaviour
     public int maxLevel;
     public int score;
     public bool isOver;
-
+    public AudioSource bgmPlayer;
+    public AudioSource[] sfxPlayer;
+    public AudioClip[] sfxClip;
+    public enum Sfx { LevelUp, Next, Attach, Button, Over};
+    int sfxCursor;
     private void Awake()
     {
         //프레임이 일정하게 하기
@@ -22,6 +26,7 @@ public class GameManager : MonoBehaviour
     }
     void Start()
     {
+        bgmPlayer.Play();
         NextDongle();
     }
     //다음 동글을 가져올 함수
@@ -37,6 +42,7 @@ public class GameManager : MonoBehaviour
         //동글이의 레벨 값을 0~ maxLevel중에 랜덤으로 설정
         lastDongle.level = Random.Range(0, maxLevel);
         lastDongle.gameObject.SetActive(true);
+        SfxPlay(Sfx.Next);
         StartCoroutine(WaitNext());
     }
     //동글이 떨어지기를 기다리는 코루틴 
@@ -109,6 +115,35 @@ public class GameManager : MonoBehaviour
             dongles[i].Hide(Vector3.up * 100); //게임 플레이 중에 나올 수 없는 큰 값을 전달하고 숨기기
             yield return new WaitForSeconds(0.1f);
         }
+
+        yield return new WaitForSeconds(1f);
+        SfxPlay(Sfx.Over);
+
+    }
+    public void SfxPlay(Sfx type)
+    {
+        switch (type)
+        {
+            case Sfx.LevelUp:
+                sfxPlayer[sfxCursor].clip = sfxClip[Random.Range(3, 6)];
+                break;
+            case Sfx.Next:
+                sfxPlayer[sfxCursor].clip = sfxClip[6];
+                break;
+            case Sfx.Over:
+                sfxPlayer[sfxCursor].clip = sfxClip[2];
+                break;
+            case Sfx.Button:
+                sfxPlayer[sfxCursor].clip = sfxClip[1];
+                break;
+            case Sfx.Attach: //어느 사물이든 부딪힐때 나는 소리
+                sfxPlayer[sfxCursor].clip = sfxClip[0];
+                break;
+            default:
+                break;
+        }
+        sfxPlayer[sfxCursor].Play();
+        sfxCursor = (sfxCursor + 1) % sfxPlayer.Length;
     }
 
 }
